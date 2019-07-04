@@ -3,7 +3,7 @@
         var json_data = "";
         var address = ""
         var abi = {}
-        var all_accountws = []
+        var all_accounts = []
         var web3Local;
         ethereum.enable();
         xhr = new XMLHttpRequest();
@@ -14,13 +14,15 @@
                     address = json_data["networks"][5777]["address"];
                     abi = json_data["abi"];
                     web3Local = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+                    all_accounts = web3Local.eth.accounts;
                     var contract = web3Local.eth.contract(abi).at(address);
                     contract.Transfer((error,result)=>{
                         console.log(result.args);
                         console.log("transfer from:"+result.args.from);
                         console.log("transfer value:"+result.args.value);
                     });
-
+                    make_table();
+                    document.getElementById("ammount").value = all_accounts[1];
 
                 }
                 else{
@@ -33,12 +35,45 @@
         xhr.open("GET","./build/contracts/MyToken.json");
         xhr.send();
         //var address = 
-        
 
-        function send(){
-            var tkn = web3.eth.contract(abi).at(address);
-            var dst = document.getElementById("address");
+        function make_table(){
+            var table = document.getElementById("account_table");
+            console.log(table.innerHTML);
+            table.innerHTML = "";
+            for(var i=0;i<10;i++){
+                console.log(all_accounts[i]);
+                console.log(web3Local.eth.getBalance(all_accounts[i]));
+                var ammount = web3Local.eth.getBalance(all_accounts[i]).toNumber();
+                ammount = web3Local.fromWei(ammount,"ether");
+                table.innerHTML += "<tr>\n<td>" + all_accounts[i] +  "</td>" + "<td>"+ammount+"</td></tr>\n"
+                //table.innderHTML += all_accounts[i] + "</td>\
+                                        //<td>ii</td>\
+                                    //</tr>\n"
+
+            }
+
+        }
+        
+        function send_ether(){
+            //var tkn = web3.eth.contract(abi).at(address);
+            var dst = document.getElementById("address").value;
             var ammount = document.getElementById("ammount").value;
+            ammount = web3.toWei();
+            transaction = {
+                "from":web3.eth.accounts[0],
+                "to":dst,
+                "value":ammount
+            }
+            console.log(transaction);
+            web3.eth.sendTransaction(transaction,(e,r) =>{
+                console.log(r);
+            });
+        }
+
+        function send_lucas(){
+            var tkn = web3.eth.contract(abi).at(address);
+            var dst = document.getElementById("address2");
+            var ammount = document.getElementById("ammount2").value;
             var rate = Math.pow(10,18);
             ammount *= rate;
             //var dst = "0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c";
@@ -83,12 +118,44 @@
             button {
                 height : 30px;
             }
+            table {
+                border-collapse: collapse;
+                border-style: solid;
+            }
+            th {
+                border-style: solid;
+            }
+            td {
+                border-style: solid;
+            }
         </style>
         <h1>Test</h1>
-        <div>
-            <input type="text" id="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+        <div class="pay_div">
+            <!--<input type="text" id="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
             <input type="number" id="ammount" value="11">
+            <button onclick="send()">支払い</button> -->
+            <h2>Ether</h2>
+            <input type="text" id="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+            <input type="number" id="ammount" value="3">
             <button onclick="send()">支払い</button>
+            <table>
+                <tbody id="account_table">
+                    <tr>
+                        <th>account</th><th>value</th>
+                    </tr>
+                </tbody>
+            </table>
+            <h2>Lucas Table</h2>
+            <input type="text" id="address2" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+            <input type="number" id="ammount2" value="3">
+            <button onclick="send2()">支払い</button>
+            <table>
+                <tbody id="lucas_table">
+                    <tr>
+                        <th>account</th><th>value</th>
+                    </tr>
+                </tbody>
+            </table>
         </div>
 
     </body>
