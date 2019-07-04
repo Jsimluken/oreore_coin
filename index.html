@@ -1,0 +1,95 @@
+<html>
+    <script>
+        var json_data = "";
+        var address = ""
+        var abi = {}
+        var all_accountws = []
+        var web3Local;
+        ethereum.enable();
+        xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function(){
+            if(xhr.readyState == 4){
+                if(xhr.status == 200){
+                    json_data = JSON.parse(xhr.responseText);
+                    address = json_data["networks"][5777]["address"];
+                    abi = json_data["abi"];
+                    web3Local = new Web3(new Web3.providers.HttpProvider("http://localhost:7545"));
+                    var contract = web3Local.eth.contract(abi).at(address);
+                    contract.Transfer((error,result)=>{
+                        console.log(result.args);
+                        console.log("transfer from:"+result.args.from);
+                        console.log("transfer value:"+result.args.value);
+                    });
+
+
+                }
+                else{
+                    alert("NG");
+                }
+            }
+            
+            //alert("ok!!")
+        }
+        xhr.open("GET","./build/contracts/MyToken.json");
+        xhr.send();
+        //var address = 
+        
+
+        function send(){
+            var tkn = web3.eth.contract(abi).at(address);
+            var dst = document.getElementById("address");
+            var ammount = document.getElementById("ammount").value;
+            var rate = Math.pow(10,18);
+            ammount *= rate;
+            //var dst = "0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c";
+            console.log(tkn.totalSupply((e,r)=>{
+                console.log(r);
+            }));
+            tkn.transfer(dst.value,ammount,(e,r)=>{
+                console.log(r);
+            });
+        }
+
+        function get_info(){
+            var tkn = web3.eth.contract(abi).at(address);
+            console.log(tkn.totalSupply((e,r)=>{
+                var ammount = r;
+                var rate = Math.pow(10,18);
+                r /= rate;
+                console.log("total:"+r);
+            }));
+            console.log(tkn.balanceOf(web3.eth.accounts[0],(e,r)=>{
+                var ammount = r;
+                var rate = Math.pow(10,18);
+                r /= rate;
+                console.log("account:"+r);
+            }));
+        }
+
+        //function get_accounts()
+
+    </script>
+
+    <body>
+        <style>
+            #address {
+                width: 340px;
+                height: 30px;
+            }
+            #ammount {
+                width:50px;
+                height:30px;
+            }
+            button {
+                height : 30px;
+            }
+        </style>
+        <h1>Test</h1>
+        <div>
+            <input type="text" id="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+            <input type="number" id="ammount" value="11">
+            <button onclick="send()">支払い</button>
+        </div>
+
+    </body>
+</html>
