@@ -17,12 +17,15 @@
                     all_accounts = web3Local.eth.accounts;
                     var contract = web3Local.eth.contract(abi).at(address);
                     contract.Transfer((error,result)=>{
+                        make_lucas_table();
                         console.log(result.args);
                         console.log("transfer from:"+result.args.from);
                         console.log("transfer value:"+result.args.value);
                     });
                     make_table();
-                    document.getElementById("ammount").value = all_accounts[1];
+                    make_lucas_table();
+                    document.getElementById("address").value = all_accounts[1];
+                    document.getElementById("address2").value = all_accounts[1];
 
                 }
                 else{
@@ -53,12 +56,37 @@
             }
 
         }
+
+        function make_lucas_table(){
+            var table = document.getElementById("lucas_table");
+            var tkn = web3Local.eth.contract(abi).at(address);
+            table.innerHTML = "<tr><td>account</td><td>value</td></tr>";
+            for(var i = 0;i<10;i++){
+                //var ammount;
+                /*await(tkn.balanceOf(all_accounts[i],(e,r) =>{
+                    //console.log(r.toNumber());
+                    ammount = r.toNumber();
+                    
+                    ammount = web3.fromWei(ammount,"ether")
+                    //console.log(ammount);
+                    //console.log(i);
+                    table.innerHTML += "<tr><td>" +all_accounts[0]+ "</td><td>"+ammount+"</td></tr>"
+                }));*/
+
+                var ammount = tkn.balanceOf(all_accounts[i]).toNumber()
+                ammount = web3Local.fromWei(ammount,"ether");
+                console.log(ammount)
+                table.innerHTML += "<tr><td>" +all_accounts[i]+ "</td><td>"+ammount+"</td></tr>"
+                
+            }
+        }
         
         function send_ether(){
             //var tkn = web3.eth.contract(abi).at(address);
             var dst = document.getElementById("address").value;
             var ammount = document.getElementById("ammount").value;
-            ammount = web3.toWei();
+            console.log(ammount);
+            ammount = web3.toWei(ammount,"ether");
             transaction = {
                 "from":web3.eth.accounts[0],
                 "to":dst,
@@ -107,11 +135,11 @@
 
     <body>
         <style>
-            #address {
+            .address {
                 width: 340px;
                 height: 30px;
             }
-            #ammount {
+            .ammount {
                 width:50px;
                 height:30px;
             }
@@ -135,9 +163,9 @@
             <input type="number" id="ammount" value="11">
             <button onclick="send()">支払い</button> -->
             <h2>Ether</h2>
-            <input type="text" id="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
-            <input type="number" id="ammount" value="3">
-            <button onclick="send()">支払い</button>
+            <input type="text" id="address" class="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+            <input type="number" id="ammount" class="ammount" value="3">
+            <button onclick="send_ether()">支払い</button>
             <table>
                 <tbody id="account_table">
                     <tr>
@@ -146,9 +174,9 @@
                 </tbody>
             </table>
             <h2>Lucas Table</h2>
-            <input type="text" id="address2" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
-            <input type="number" id="ammount2" value="3">
-            <button onclick="send2()">支払い</button>
+            <input type="text" id="address2" class="address" value="0xc6DC4BD9467B7D0f478e6F30ed9F6Be9e1d1dF5c">
+            <input type="number" id="ammount2" class="ammount" value="3">
+            <button onclick="send_lucas()">支払い</button>
             <table>
                 <tbody id="lucas_table">
                     <tr>
